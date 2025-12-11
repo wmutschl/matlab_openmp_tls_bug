@@ -1,0 +1,67 @@
+
+--------------------------------------------------------------------------------
+          Segmentation violation detected at 2025-12-11 10:21:35 +0100
+--------------------------------------------------------------------------------
+
+Configuration:
+  Crash Decoding           : Disabled - No sandbox or build area path
+  Crash Mode               : continue (default)
+  Default Encoding         : UTF-8
+  Deployed                 : false
+  Graphics Driver          : Uninitialized hardware 
+  Java Version             : Java 11.0.29+7-LTS with Amazon.com Inc. OpenJDK 64-Bit Server VM mixed mode
+  MATLAB Architecture      : maca64
+  MATLAB Entitlement ID    : 1901537
+  MATLAB Root              : /Applications/MATLAB_R2025a.app
+  MATLAB Version           : 25.1.0.2973910 (R2025a) Update 1
+  OpenGL                   : hardware
+  Operating System         : Mac OS Version 26.1 (Build 25B78)
+  Process ID               : 70644
+  Processor ID             : ABI64 ARM ARM64E
+  Session Key              : 7ryhf8l6vdwyonmzdmn020a51
+  Window System            : Quartz
+
+Fault Count: 1
+
+
+Abnormal termination:
+Segmentation violation
+
+Current Thread: 'MCR 0 interpreter thread' id 0x171ccf000
+
+Register State (from fault):
+   X0 = 0000000c0662a300   X1 = 0000000000000060
+   X2 = fffff0007fc00000   X3 = 0000000000000001
+   X4 = 0000000c25552c00   X5 = 0000000171ccee6f
+   X6 = 0000000000000001   X7 = 0000000134ce6040
+   X8 = 000000017dcf0780   X9 = fffffffe8230f87f
+  X10 = 0000000000000000  X11 = 0000000000000000
+  X12 = 0520710300416ab8  X13 = 0520610280416228
+  X14 = 0000000000016800  X15 = 0000000000000030
+  X16 = 952d000c25552b80  X17 = 0000000206102a28
+  X18 = 0000000000000000  X19 = 0000000171ccf000
+  X20 = 0000000000000000  X21 = 0000000171ccf8e0
+  X22 = 00000001fac2c030  X23 = 0000000171ccf4c8
+  X24 = 0000000171ccf130  X25 = 00000001fac24000
+  X26 = 0000000000000061  X27 = 0000000000000000
+  X28 = 0000000000000000
+
+   FP = 0000000171ccef90   LR = 000000018e247620
+   SP = 0000000171ccef40   PC = 000000017dcf0780
+
+ CPSR = 80000800
+
+
+Stack Trace (from fault):
+[  0] 0x000000010453e820 /Applications/MATLAB_R2025a.app/bin/maca64/libmwfl.dylib+00010272 _ZN10foundation4core4diag15stacktrace_base7captureERKNS1_14thread_contextEm+00000064
+[  1] 0x00000001045418bc /Applications/MATLAB_R2025a.app/bin/maca64/libmwfl.dylib+00022716 _ZN10foundation4core4test17terminate_handledERKNSt3__112basic_stringIcNS2_11char_traitsIcEENS2_9allocatorIcEEEE+00002208
+[  2] 0x0000000104540d14 /Applications/MATLAB_R2025a.app/bin/maca64/libmwfl.dylib+00019732 _ZN10foundation4core4diag13terminate_logEPKcPK17__darwin_ucontext+00000140
+[  3] 0x0000000110855014 /Applications/MATLAB_R2025a.app/bin/maca64/libmwmcr.dylib+00479252 _Z19mnPrintErrorMessageRKNSt3__112basic_stringIcNS_11char_traitsIcEENS_9allocatorIcEEEE+00011664
+[  4] 0x0000000110852f6c /Applications/MATLAB_R2025a.app/bin/maca64/libmwmcr.dylib+00470892 _Z19mnPrintErrorMessageRKNSt3__112basic_stringIcNS_11char_traitsIcEENS_9allocatorIcEEEE+00003304
+[  5] 0x000000011085091c /Applications/MATLAB_R2025a.app/bin/maca64/libmwmcr.dylib+00461084 mnFatalSignalHandler+00000136
+[  6] 0x000000018e253744           /usr/lib/system/libsystem_platform.dylib+00014148 _sigtramp+00000056
+[  7] 0x000000018e247620            /usr/lib/system/libsystem_pthread.dylib+00017952 _pthread_tsd_cleanup+00000488
+[  8] 0x000000018e24a2e8            /usr/lib/system/libsystem_pthread.dylib+00029416 _pthread_exit+00000084
+[  9] 0x000000018e249c14            /usr/lib/system/libsystem_pthread.dylib+00027668 _pthread_start+00000148
+[ 10] 0x000000018e244ba8            /usr/lib/system/libsystem_pthread.dylib+00007080 thread_start+00000008
+

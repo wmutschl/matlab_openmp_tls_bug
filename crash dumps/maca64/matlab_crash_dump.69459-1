@@ -1,0 +1,90 @@
+
+--------------------------------------------------------------------------------
+                Trace trap detected at 2025-12-11 10:20:39 +0100
+--------------------------------------------------------------------------------
+
+Configuration:
+  Crash Decoding           : Disabled - No sandbox or build area path
+  Crash Mode               : continue (default)
+  Default Encoding         : UTF-8
+  Deployed                 : false
+  Graphics Driver          : Uninitialized hardware 
+  Java Version             : Java 11.0.29+7-LTS with Amazon.com Inc. OpenJDK 64-Bit Server VM mixed mode
+  MATLAB Architecture      : maca64
+  MATLAB Entitlement ID    : 1901537
+  MATLAB Root              : /Applications/MATLAB_R2024b.app
+  MATLAB Version           : 24.2.0.2923080 (R2024b) Update 6
+  OpenGL                   : hardware
+  Operating System         : Mac OS Version 26.1 (Build 25B78)
+  Process ID               : 69459
+  Processor ID             : ABI64 ARM ARM64E
+  Session Key              : e6885b68-095f-456d-81a3-952de585e773
+  Window System            : Quartz
+
+Fault Count: 1
+
+
+Abnormal termination:
+Trace trap
+
+Current Thread: 'Chrome_IOThread' id 0x17e383000
+
+Register State (from fault):
+   X0 = 0000000000000000   X1 = 0000000aa1656120
+   X2 = 0000000000000400   X3 = 000000017e381ed0
+   X4 = 000000017e381b80   X5 = 0000000000000000
+   X6 = ffffffffbfc007ff   X7 = fffff0003ffff800
+   X8 = 0000000000000000   X9 = 0000000000000000
+  X10 = 0000000000000000  X11 = 0000000000000002
+  X12 = 0000000000000000  X13 = 0000000000000000
+  X14 = 0000000000000000  X15 = 0000000aa1654000
+  X16 = 000000018e2448cc  X17 = 000000017e383000
+  X18 = 0000000000000000  X19 = 000000017e382010
+  X20 = 000000017e382020  X21 = 000000017e382028
+  X22 = 0000000309bb6818  X23 = 0000000000000084
+  X24 = 00000003099f2000  X25 = 0000000aa1656120
+  X26 = 0000000000000083  X27 = 0000000000000084
+  X28 = 0000000000000084
+
+   FP = 000000017e382000   LR = 00000003031f5f34
+   SP = 000000017e381ae0   PC = 00000003031f5f68
+
+ CPSR = 60000000
+
+
+Stack Trace (from fault):
+[  0] 0x0000000100df1838 /Applications/MATLAB_R2024b.app/bin/maca64/libmwfl.dylib+00006200 _ZN10foundation4core4diag15stacktrace_base7captureERKNS1_14thread_contextEm+00000064
+[  1] 0x0000000100df48d4 /Applications/MATLAB_R2024b.app/bin/maca64/libmwfl.dylib+00018644 _ZN10foundation4core4test17terminate_handledERKNSt3__112basic_stringIcNS2_11char_traitsIcEENS2_9allocatorIcEEEE+00002208
+[  2] 0x0000000100df3d2c /Applications/MATLAB_R2024b.app/bin/maca64/libmwfl.dylib+00015660 _ZN10foundation4core4diag13terminate_logEPKcPK17__darwin_ucontext+00000140
+[  3] 0x000000010cd322e8 /Applications/MATLAB_R2024b.app/bin/maca64/libmwmcr.dylib+00467688 _Z19mnPrintErrorMessageRKNSt3__112basic_stringIcNS_11char_traitsIcEENS_9allocatorIcEEEE+00011664
+[  4] 0x000000010cd30240 /Applications/MATLAB_R2024b.app/bin/maca64/libmwmcr.dylib+00459328 _Z19mnPrintErrorMessageRKNSt3__112basic_stringIcNS_11char_traitsIcEENS_9allocatorIcEEEE+00003304
+[  5] 0x000000010cd2d69c /Applications/MATLAB_R2024b.app/bin/maca64/libmwmcr.dylib+00448156 mnFatalSignalHandler+00000136
+[  6] 0x000000018e253744           /usr/lib/system/libsystem_platform.dylib+00014148 _sigtramp+00000056
+[  7] 0x00000003031f5f34 /Applications/MATLAB_R2024b.app/bin/maca64/Frameworks/Chromium Embedded Framework.framework/Chromium Embedded Framework+52387636 cef_time_delta+02081960
+[  8] 0x0000000302fdd328 /Applications/MATLAB_R2024b.app/bin/maca64/Frameworks/Chromium Embedded Framework.framework/Chromium Embedded Framework+50189096 cef_log+00000084
+[  9] 0x000000015a718078 /Applications/MATLAB_R2024b.app/bin/maca64/libjcef.dylib+00376952 _ZN13TempWindowMac9GetWindowEv+00003372
+[ 10] 0x000000015a77dfc8 /Applications/MATLAB_R2024b.app/bin/maca64/libjcef.dylib+00794568 _ZN13TempWindowMac9GetWindowEv+00420988
+[ 11] 0x000000015a74a914 /Applications/MATLAB_R2024b.app/bin/maca64/libjcef.dylib+00583956 _ZN13TempWindowMac9GetWindowEv+00210376
+[ 12] 0x00000001596ff1f4 /Applications/MATLAB_R2024b.app/bin/maca64/libmwcef_common.dylib+00094708 _ZN10cef_common22ResourceRequestHandler20OnBeforeResourceLoadE13scoped_refptrI10CefBrowserES1_I8CefFrameES1_I10CefRequestES1_I11CefCallbackE+00000748
+[ 13] 0x000000015a73e388 /Applications/MATLAB_R2024b.app/bin/maca64/libjcef.dylib+00533384 _ZN13TempWindowMac9GetWindowEv+00159804
+[ 14] 0x000000030003e4f4 /Applications/MATLAB_R2024b.app/bin/maca64/Frameworks/Chromium Embedded Framework.framework/Chromium Embedded Framework+00255220 cef_resource_bundle_get_global+00005444
+[ 15] 0x0000000302fbd920 /Applications/MATLAB_R2024b.app/bin/maca64/Frameworks/Chromium Embedded Framework.framework/Chromium Embedded Framework+50059552 ChromeAppModeStart_v6+07744988
+[ 16] 0x0000000302fb1cc0 /Applications/MATLAB_R2024b.app/bin/maca64/Frameworks/Chromium Embedded Framework.framework/Chromium Embedded Framework+50011328 ChromeAppModeStart_v6+07696764
+[ 17] 0x0000000302fbef7c /Applications/MATLAB_R2024b.app/bin/maca64/Frameworks/Chromium Embedded Framework.framework/Chromium Embedded Framework+50065276 ChromeAppModeStart_v6+07750712
+[ 18] 0x0000000302fbf364 /Applications/MATLAB_R2024b.app/bin/maca64/Frameworks/Chromium Embedded Framework.framework/Chromium Embedded Framework+50066276 ChromeAppModeStart_v6+07751712
+[ 19] 0x0000000302fbf420 /Applications/MATLAB_R2024b.app/bin/maca64/Frameworks/Chromium Embedded Framework.framework/Chromium Embedded Framework+50066464 ChromeAppModeStart_v6+07751900
+[ 20] 0x0000000302fb76c0 /Applications/MATLAB_R2024b.app/bin/maca64/Frameworks/Chromium Embedded Framework.framework/Chromium Embedded Framework+50034368 ChromeAppModeStart_v6+07719804
+[ 21] 0x0000000302fb7780 /Applications/MATLAB_R2024b.app/bin/maca64/Frameworks/Chromium Embedded Framework.framework/Chromium Embedded Framework+50034560 ChromeAppModeStart_v6+07719996
+[ 22] 0x0000000303236a04 /Applications/MATLAB_R2024b.app/bin/maca64/Frameworks/Chromium Embedded Framework.framework/Chromium Embedded Framework+52652548 cef_time_delta+02346872
+[ 23] 0x0000000303249408 /Applications/MATLAB_R2024b.app/bin/maca64/Frameworks/Chromium Embedded Framework.framework/Chromium Embedded Framework+52728840 cef_time_delta+02423164
+[ 24] 0x000000030324908c /Applications/MATLAB_R2024b.app/bin/maca64/Frameworks/Chromium Embedded Framework.framework/Chromium Embedded Framework+52727948 cef_time_delta+02422272
+[ 25] 0x00000003032939f8 /Applications/MATLAB_R2024b.app/bin/maca64/Frameworks/Chromium Embedded Framework.framework/Chromium Embedded Framework+53033464 cef_time_delta+02727788
+[ 26] 0x0000000303249a40 /Applications/MATLAB_R2024b.app/bin/maca64/Frameworks/Chromium Embedded Framework.framework/Chromium Embedded Framework+52730432 cef_time_delta+02424756
+[ 27] 0x000000030321a6a0 /Applications/MATLAB_R2024b.app/bin/maca64/Frameworks/Chromium Embedded Framework.framework/Chromium Embedded Framework+52536992 cef_time_delta+02231316
+[ 28] 0x0000000303261220 /Applications/MATLAB_R2024b.app/bin/maca64/Frameworks/Chromium Embedded Framework.framework/Chromium Embedded Framework+52826656 cef_time_delta+02520980
+[ 29] 0x0000000301c545c0 /Applications/MATLAB_R2024b.app/bin/maca64/Frameworks/Chromium Embedded Framework.framework/Chromium Embedded Framework+29705664 cef_string_map_size+29155124
+[ 30] 0x000000030326139c /Applications/MATLAB_R2024b.app/bin/maca64/Frameworks/Chromium Embedded Framework.framework/Chromium Embedded Framework+52827036 cef_time_delta+02521360
+[ 31] 0x000000030327f114 /Applications/MATLAB_R2024b.app/bin/maca64/Frameworks/Chromium Embedded Framework.framework/Chromium Embedded Framework+52949268 cef_time_delta+02643592
+[ 32] 0x000000018e249c08            /usr/lib/system/libsystem_pthread.dylib+00027656 _pthread_start+00000136
+[ 33] 0x000000018e244ba8            /usr/lib/system/libsystem_pthread.dylib+00007080 thread_start+00000008
+
