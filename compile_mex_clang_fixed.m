@@ -1,8 +1,14 @@
-% compile_mex_clang_fixed.m - Compile the FIXED version with Apple Clang/libomp
+% compile_mex_clang_fixed.m - Compile with Apple Clang + Homebrew libomp + mexLock
 %
-% This compiles openmp_tls_crash_fixed.cpp which includes the mexLock() fix.
-% Note: The libomp crash is a different issue (mutex init failure), so
-% mexLock() may not fix it, but let's test to confirm.
+% WARNING: This does NOT fix the crash!
+% The Homebrew libomp crash occurs during EXECUTION (mutex init failure),
+% not during exit. mexLock() only prevents exit crashes by keeping the
+% MEX loaded, so it cannot help here.
+%
+% RECOMMENDED: Use compile_mex_matlab_omp.m instead, which links against
+% MATLAB's bundled libomp and works correctly without any workarounds.
+%
+% This script exists only to demonstrate that mexLock() is not a universal fix.
 %
 % Requires: brew install libomp
 
@@ -71,9 +77,7 @@ end
 delete('openmp_tls_crash_fixed.o');
 
 fprintf('Compilation successful!\n\n');
-fprintf('To test the FIX with Apple Clang/libomp:\n');
-fprintf('  1. Run: openmp_tls_crash_fixed(1000000)\n');
-fprintf('  2. Exit MATLAB: exit\n');
-fprintf('  3. Check if crash is prevented\n');
-fprintf('\nNote: The libomp crash occurs during execution (mutex init),\n');
-fprintf('      so mexLock() may not help for that specific issue.\n');
+fprintf('WARNING: This will still crash during execution!\n');
+fprintf('The Homebrew libomp crash is a mutex init failure, not a TLS exit crash.\n');
+fprintf('mexLock() does NOT fix this.\n\n');
+fprintf('RECOMMENDED: Use compile_mex_matlab_omp.m instead.\n');

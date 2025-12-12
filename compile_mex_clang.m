@@ -1,7 +1,12 @@
-% compile_mex_clang.m - Compile using Apple Clang with libomp
+% compile_mex_clang.m - Compile using Apple Clang with Homebrew libomp
 %
-% This tests whether the crash also occurs with Apple Clang's OpenMP (libomp)
-% instead of GCC's OpenMP (libgomp).
+% WARNING: This crashes during EXECUTION (not on exit like GCC).
+% Error: "pthread_mutex_init failed: Invalid argument"
+%
+% This demonstrates that Homebrew's libomp is also incompatible with MATLAB.
+%
+% RECOMMENDED: Use compile_mex_matlab_omp.m instead, which links against
+% MATLAB's bundled libomp and works correctly.
 %
 % Requires: brew install libomp
 
@@ -75,7 +80,7 @@ end
 delete('openmp_tls_crash.o');
 
 fprintf('Compilation successful!\n\n');
-fprintf('To test with Apple Clang/libomp:\n');
-fprintf('  1. Run: openmp_tls_crash(1000000)\n');
-fprintf('  2. Exit MATLAB: exit\n');
-fprintf('  3. Check if crash occurs\n');
+fprintf('WARNING: Running openmp_tls_crash will crash during EXECUTION!\n');
+fprintf('Error: "pthread_mutex_init failed: Invalid argument"\n\n');
+fprintf('This demonstrates that Homebrew''s libomp is incompatible with MATLAB.\n');
+fprintf('RECOMMENDED: Use compile_mex_matlab_omp.m instead.\n');

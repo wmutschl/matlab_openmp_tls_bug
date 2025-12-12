@@ -21,20 +21,14 @@
  * the threads fully terminate, the TLS cleanup crashes.
  *
  * Compilation (from MATLAB command window, using GCC from Homebrew):
- *   mex CXX="/opt/homebrew/bin/g++-15" CXXFLAGS="-fPIC -fopenmp" LDFLAGS="-fopenmp" openmp_tls_crash.cpp
+ *   compile_mex
+ *   (or see compile_mex.m for manual steps)
  *
- * Note: Do NOT use $CXXFLAGS/$LDFLAGS as they contain macOS Clang flags (-fobjc-arc) that GCC doesn't understand.
+ * Recommended Fix: Use MATLAB's bundled OpenMP library.
+ *   See compile_mex_matlab_omp.m
  *
- * Reproduction steps:
- *   1. Compile the MEX file
- *   2. Run in MATLAB: openmp_tls_crash(1000000)
- *   3. Exit MATLAB: exit
- *   4. Observe segmentation fault on exit
- *
- * Alternative one-liner to reproduce:
- *   /Applications/MATLAB_R2025b.app/bin/matlab -nodisplay -batch "openmp_tls_crash(1000000)"
- *
- * Workaround: Use mexLock() to prevent MEX unloading (uncomment below)
+ * Workaround (if must use GCC): Use mexLock() to prevent MEX unloading.
+ *   See openmp_tls_crash_fixed.cpp
  */
 
 #include "mex.h"
@@ -44,16 +38,8 @@
 void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[])
 {
     /*
-     * WORKAROUND: Uncomment the following block to prevent the crash.
-     * mexLock() prevents the MEX file from being unloaded, ensuring
-     * the OpenMP runtime remains in memory during TLS cleanup at exit.
-     *
-     * static bool locked = false;
-     * if (!locked)
-     * {
-     *     mexLock();
-     *     locked = true;
-     * }
+     * Note: This is the minimal reproducer.
+     * For the fixed version with mexLock(), see openmp_tls_crash_fixed.cpp
      */
 
     // Input validation

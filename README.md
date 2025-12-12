@@ -20,60 +20,92 @@ This is related to an issue we faced in [Dynare](https://git.dynare.org/Dynare/d
 
 - **OS**: macOS 26.x (Tahoe) on Apple Silicon
 - **Architecture**: ARM64 (M2 Max and M4 Pro)
-- **Compiler**: GCC with libgomp (e.g., `g++-15` from Homebrew)
+- **Compilers tested**:
+  - GCC with libgomp (e.g., `g++-15` from Homebrew) - crashes
+  - Apple Clang with Homebrew libomp - crashes
+  - Apple Clang with MATLAB's bundled libomp - **works**
 
 ## OpenMP Implementation Comparison
 
-Both major OpenMP implementations fail on macOS ARM64 with MATLAB R2024b+:
-
 | OpenMP Implementation | Behavior |
 |-----------------------|----------|
-| GCC + libgomp         | ✅ Executes successfully, ❌ Crashes on **exit** (TLS cleanup)   |
-| Apple Clang + libomp  | ❌ Crashes during **execution** (mutex init: `Invalid argument`) |
+| GCC + libgomp (Homebrew) | ✅ Executes successfully, ❌ Crashes on **exit** (TLS cleanup) |
+| Apple Clang + libomp (Homebrew) | ❌ Crashes during **execution** (mutex init: `Invalid argument`) |
+| Apple Clang + **MATLAB's libomp** | ✅ Works correctly, ✅ No crash on exit |
 
-This suggests a fundamental issue with how MATLAB R2024b+ handles threading libraries on macOS ARM64.
+The key insight is that MATLAB bundles its own OpenMP library (`libomp.dylib`) and **linking against external OpenMP implementations causes incompatibilities**. See [MathWorks Solution](#solution-use-matlabs-bundled-openmp-recommended).
 
 ## Files
 
-### Bug Reproducers (without fix)
-- `openmp_tls_crash.cpp` - Minimal MEX reproducer (crashes)
-- `compile_mex.m` - Compilation script (GCC/libgomp)
-- `compile_mex_clang.m` - Compilation script (Apple Clang/libomp)
-- `test_crash.m` - MATLAB test script
+### Bug Reproducers (crash with external OpenMP)
+- `openmp_tls_crash.cpp` - Minimal MEX reproducer
+- `compile_mex.m` - Compilation script (GCC/libgomp) - **crashes on exit**
+- `compile_mex_clang.m` - Compilation script (Apple Clang + Homebrew libomp) - **crashes during execution**
+- `test_crash.m` - MATLAB test script (run `test_crash` or `test_crash('fix')`)
 
-### Fixed Versions (with mexLock workaround)
+### Working Solution (Recommended: MATLAB's bundled OpenMP)
+- `compile_mex_matlab_omp.m` - Compilation script using MATLAB's bundled libomp - **works correctly** (solves both crashes)
+
+### Alternative Workaround (mexLock for GCC)
 - `openmp_tls_crash_fixed.cpp` - MEX with conditional mexLock() fix
-- `compile_mex_fixed.m` - Compile fixed version (GCC/libgomp)
-- `compile_mex_clang_fixed.m` - Compile fixed version (Apple Clang/libomp)
+- `compile_mex_fixed.m` - Compile fixed version (GCC/libgomp) - **works** (prevents exit crash)
+- `compile_mex_clang_fixed.m` - Compile fixed version (Apple Clang/Homebrew libomp) - **still crashes** (mutex error not fixed by lock)
 
 ## Quick Reproduction
 
-### Option 1: One-liner (crashes on exit)
+### Reproduce the Crash (GCC/libgomp)
 
 ```bash
-# in a terminal
+# One-liner (crashes on exit with code 137)
 cd /path/to/this/folder
 /Applications/MATLAB_R2025b.app/bin/matlab -nodisplay -batch "run('compile_mex.m'); openmp_tls_crash(1000000)"
-ls $HOME
+# Crash dump will appear in $HOME
 ```
-The crash dump pollutes the User's home directory.
 
-### Option 2: Interactive
+### Verify the Solution (MATLAB's libomp)
+
+```bash
+# One-liner (exits cleanly with code 0)
+cd /path/to/this/folder
+/Applications/MATLAB_R2025b.app/bin/matlab -nodisplay -batch "run('compile_mex_matlab_omp.m'); openmp_tls_crash(1000000)"
+# No crash!
+```
+
+### Interactive Testing
 
 ```matlab
 % In MATLAB
 cd /path/to/this/folder
-compile_mex
-openmp_tls_crash(1000000)  % Runs successfully
-exit                       % CRASH HERE -> dumps the crash dump in the User's home directory
+
+% Option A: Use the test script
+test_crash           % Compile with GCC, crash on exit
+test_crash('fix')    % Compile with MATLAB's libomp, no crash
+
+% Option B: Manual testing
+compile_mex                   % GCC/libgomp (crashes on exit)
+compile_mex_matlab_omp        % MATLAB's libomp (works!)
+openmp_tls_crash(1000000)     % Runs successfully
+exit                          % Crash or clean exit depending on compilation
 ```
 
 ## Compilation
 
-The MEX file must be compiled with OpenMP support using GCC:
+### Recommended: Use MATLAB's OpenMP (no crash)
 
 ```matlab
-% Using GCC from Homebrew
+% Uses Apple Clang + MATLAB's bundled libomp
+compile_mex_matlab_omp
+```
+
+### For Reproduction: GCC/libgomp (crashes on exit)
+
+```matlab
+% Using GCC from Homebrew - will crash on MATLAB exit
+compile_mex
+```
+
+Or manually:
+```matlab
 mex CXX="/opt/homebrew/bin/g++-15" ...
     CXXFLAGS="-fPIC -fopenmp" ...
     LDFLAGS="-fopenmp" ...
@@ -81,8 +113,6 @@ mex CXX="/opt/homebrew/bin/g++-15" ...
 ```
 
 **Note**: Do NOT inherit `$CXXFLAGS`/`$LDFLAGS` as MATLAB's defaults contain macOS Clang-specific flags (`-fobjc-arc`) that GCC doesn't understand.
-
-Or use the provided `compile_mex.m` script which auto-detects GCC.
 
 ## Crash Logs
 
@@ -133,9 +163,72 @@ OpenMP (libgomp) registers per-thread cleanup handlers for its thread-local data
 
 This appears to be a regression in how MATLAB R2024b+ handles MEX unloading or thread cleanup ordering on macOS ARM64.
 
-## Workaround
+## Solution: Use MATLAB's Bundled OpenMP (Recommended)
 
-Use `mexLock()` to prevent the MEX file from being unloaded. The fix should be conditionally compiled only for the affected platform:
+MathWorks provides guidance on using OpenMP in MEX files in [MATLAB Answers #237411](https://de.mathworks.com/matlabcentral/answers/237411-can-i-make-use-of-openmp-in-my-matlab-mex-files). The key recommendation is:
+
+> *"MATLAB uses Intel's OpenMP implementation. Linking your MEX-files against other OpenMP implementations, like Microsoft's or GNU's (libgomp), can lead to incompatibilities. It's recommended to link against Intel's OpenMP libraries, which are included with MATLAB."*
+
+MATLAB R2024b+ on macOS ARM64 bundles its own OpenMP runtime:
+
+```
+$MATLABROOT/bin/maca64/libomp.dylib
+$MATLABROOT/toolbox/eml/externalDependency/omp/maca64/include/omp.h
+$MATLABROOT/toolbox/eml/externalDependency/omp/maca64/lib/libomp.dylib
+```
+
+### Compilation with MATLAB's OpenMP
+
+Use Apple Clang and link against MATLAB's bundled `libomp.dylib`:
+
+```bash
+# Compile (use Homebrew's omp.h header or MATLAB's)
+/usr/bin/clang++ -c -fPIC -Xclang -fopenmp -std=c++17 \
+    -I"$MATLABROOT/extern/include" \
+    -I"/opt/homebrew/opt/libomp/include" \
+    -DMATLAB_MEX_FILE \
+    -o openmp_tls_crash.o openmp_tls_crash.cpp
+
+# Link against MATLAB's libomp (NOT Homebrew's)
+# Note: Check for libomp.dylib or libiomp5.dylib in bin/maca64
+/usr/bin/clang++ -shared \
+    -L"$MATLABROOT/bin/maca64" -lomp \
+    -L"$MATLABROOT/bin/maca64" -Wl,-rpath,"$MATLABROOT/bin/maca64" \
+    -lmx -lmex -lmat \
+    -o openmp_tls_crash.mexmaca64 openmp_tls_crash.o
+```
+
+Or use the provided script:
+
+```matlab
+compile_mex_matlab_omp
+openmp_tls_crash(1000000)
+exit  % No crash!
+```
+
+### Test Results
+
+| Compilation Method | Exit Behavior |
+|-------------------|---------------|
+| `compile_mex.m` (GCC/libgomp) | ❌ Exit code 137, segfault in `_pthread_tsd_cleanup` |
+| `compile_mex_clang.m` (Homebrew libomp) | ❌ Crash during execution |
+| `compile_mex_matlab_omp.m` (MATLAB's libomp) | ✅ Exit code 0, clean exit |
+
+**Advantages of this solution:**
+- No code changes required (no `mexLock()`)
+- MEX files properly unload/reload during development
+- Follows MathWorks' official recommendation
+
+**Requirements:**
+- Apple Clang (system default `/usr/bin/clang++`)
+- Homebrew's libomp for the `omp.h` header: `brew install libomp`
+- MATLAB R2024b+ (which bundles `libomp.dylib`)
+
+---
+
+## Alternative Workaround: mexLock()
+
+If you cannot switch compilers (e.g., must use GCC for other reasons), use `mexLock()` to prevent the MEX file from being unloaded:
 
 ```cpp
 void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[])
@@ -156,34 +249,44 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[])
 
 This keeps the MEX file (and the OpenMP runtime) in memory, so the TLS cleanup handlers remain valid.
 
-**Downside**: MEX files are no longer automatically reloaded when recompiled, which affects the development workflow.
+**Downside**: MEX files are no longer automatically reloaded when recompiled, which affects the development workflow. You must call `clear mex` or restart MATLAB to pick up changes.
 
-### Testing the Fix
+### Testing the mexLock Workaround
 
 **Test with GCC/libgomp (should NOT crash):**
 ```bash
 /Applications/MATLAB_R2025b.app/bin/matlab -nodisplay -batch "run('compile_mex_fixed.m'); openmp_tls_crash_fixed(1000000)"
 ```
 
-**Test with Apple Clang/libomp:**
-```bash
-/Applications/MATLAB_R2025b.app/bin/matlab -nodisplay -batch "run('compile_mex_clang_fixed.m'); openmp_tls_crash_fixed(1000000)"
-```
-
-Note: The `mexLock()` fix resolves the GCC/libgomp exit crash. The Apple Clang/libomp crash occurs during execution (mutex initialization failure), which is a different issue that `mexLock()` does not address.
+Note: The `mexLock()` fix resolves the GCC/libgomp exit crash. The Apple Clang + Homebrew libomp crash occurs during execution (mutex initialization failure), which is a different issue that `mexLock()` does not address.
 
 ## Questions for MathWorks
 
-1. Is this a known issue?
+1. Is this a known issue with external OpenMP implementations on macOS ARM64?
+   * *Update: Yes, documented in MATLAB Answers #237411.*
 2. Was there a change in MEX unloading behavior or threading infrastructure in R2024b that could cause this?
-3. Why do both OpenMP implementations (libgomp and libomp) fail on macOS ARM64?
-4. Is there a recommended way to use OpenMP in MEX files on macOS ARM64?
-5. Is `mexLock()` the officially recommended workaround for the libgomp crash?
-6. Is a fix planned for a future release, because the prerelease of R2026a has the same issue.
+3. Is linking against MATLAB's bundled `libomp.dylib` the officially supported way to use OpenMP on macOS ARM64?
+   * *Update: Yes, it is recommended to link against MATLAB's OpenMP libraries.*
+4. Why does Homebrew's libomp fail during execution (mutex init: Invalid argument) while MATLAB's libomp works?
+5. Should MATLAB document the location of the bundled OpenMP headers and libraries for MEX development?
+6. Will future MATLAB releases continue to bundle `libomp.dylib` on macOS ARM64?
+
+## Summary
+
+| Approach | Compiler | OpenMP Library | Result |
+|----------|----------|----------------|--------|
+| External libgomp | GCC (Homebrew) | libgomp | ❌ Crash on exit |
+| External libomp | Apple Clang | libomp (Homebrew) | ❌ Crash during execution |
+| **MATLAB's libomp** | Apple Clang | libomp (MATLAB bundled) | ✅ Works |
+| mexLock workaround | GCC (Homebrew) | libgomp | ✅ Works (with limitations) |
+
+**Recommended solution**: Use Apple Clang with MATLAB's bundled `libomp.dylib` via `compile_mex_matlab_omp.m`.
 
 ## Related
 
-- This issue affects any MEX file using OpenMP on macOS ARM64
-- Both GCC/libgomp and Apple Clang/libomp have issues (different failure modes)
+- [MathWorks Answers #237411](https://de.mathworks.com/matlabcentral/answers/237411-can-i-make-use-of-openmp-in-my-matlab-mex-files) - Official guidance on OpenMP in MEX files
+- [MathWorks Answers #125117](https://de.mathworks.com/matlabcentral/answers/125117-openmp-mex-files-static-tls-problem) - Discussion of static TLS problems with OpenMP MEX files
+- [Dynare Issue #2000](https://git.dynare.org/Dynare/dynare/-/issues/2000) - Original issue that prompted this investigation
+- This issue affects any MEX file using external OpenMP libraries on macOS ARM64
 - The issue is specific to macOS ARM64; Intel Macs and other platforms appear unaffected
-- Regression introduced in MATLAB >=R2024b; R2023b and R2024a work correctly
+- Regression introduced in MATLAB ≥R2024b; R2023b and R2024a work correctly with external OpenMP

@@ -1,10 +1,18 @@
 /*
- * Fixed version of the OpenMP TLS crash reproducer
+ * Fixed version of the OpenMP TLS crash reproducer (mexLock Workaround)
  *
- * This version includes the mexLock() workaround that prevents the crash
- * by keeping the MEX file (and OpenMP runtime) loaded in memory.
+ * This version includes the mexLock() workaround that prevents the
+ * GCC/libgomp exit crash by keeping the MEX file (and OpenMP runtime)
+ * loaded in memory.
  *
- * The fix is conditionally compiled only for macOS ARM64 MATLAB builds.
+ * WARNING: This workaround ONLY fixes the GCC/libgomp exit crash.
+ * It does NOT fix the Apple Clang + Homebrew libomp execution crash.
+ *
+ * RECOMMENDED SOLUTION: Use compile_mex_matlab_omp.m instead, which
+ * links against MATLAB's bundled libomp and works without code changes.
+ *
+ * Use this workaround only if you must use GCC (e.g., for C++ features
+ * or other libraries that require GCC).
  */
 
 #include "mex.h"
@@ -14,7 +22,8 @@
 void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[])
 {
 #if defined(__APPLE__) && defined(MATLAB_MEX_FILE)
-    // Prevent MEX from being unloaded to avoid TLS cleanup crash
+    // Prevent MEX from being unloaded to avoid TLS cleanup crash on macOS ARM64
+    // See: https://git.dynare.org/Dynare/dynare/-/issues/2000
     static bool locked = false;
     if (!locked)
     {

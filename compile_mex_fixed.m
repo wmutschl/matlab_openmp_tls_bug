@@ -1,6 +1,12 @@
-% compile_mex_fixed.m - Compile the FIXED version with GCC/libgomp
+% compile_mex_fixed.m - Compile with GCC/libgomp + mexLock workaround
 %
 % This compiles openmp_tls_crash_fixed.cpp which includes the mexLock() fix.
+% The mexLock() workaround prevents the exit crash by keeping the MEX loaded.
+%
+% RECOMMENDED: Use compile_mex_matlab_omp.m instead (no code changes needed).
+%
+% Use this workaround only if you must use GCC (e.g., for C++ features
+% or other libraries that require GCC).
 
 fprintf('=== Compiling FIXED version with GCC + libgomp ===\n');
 
@@ -85,3 +91,4 @@ fprintf('To test the FIX with GCC/libgomp:\n');
 fprintf('  1. Run: openmp_tls_crash_fixed(1000000)\n');
 fprintf('  2. Exit MATLAB: exit\n');
 fprintf('  3. Verify NO crash occurs!\n');
+fprintf('\nNote: compile_mex_matlab_omp.m is the recommended solution (no code changes needed).\n');

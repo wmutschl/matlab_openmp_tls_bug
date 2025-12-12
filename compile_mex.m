@@ -1,6 +1,11 @@
-% compile_mex.m - Compile the OpenMP TLS crash reproducer
+% compile_mex.m - Compile the OpenMP TLS crash reproducer (GCC/libgomp)
 %
-% This script compiles openmp_tls_crash.cpp with OpenMP support.
+% WARNING: MEX files compiled with this script will crash on MATLAB exit!
+% The crash occurs during TLS cleanup when MATLAB unloads the MEX file.
+%
+% RECOMMENDED: Use compile_mex_matlab_omp.m instead, which links against
+% MATLAB's bundled libomp and works correctly.
+%
 % Requires GCC with OpenMP (libgomp) installed via Homebrew.
 
 % Detect GCC version (try common Homebrew installations)
@@ -87,3 +92,4 @@ fprintf('\nTo reproduce the crash:\n');
 fprintf('  1. Run: openmp_tls_crash(1000000)\n');
 fprintf('  2. Exit MATLAB: exit\n');
 fprintf('  3. Observe segmentation fault on exit\n');
+fprintf('\nFor the fix (MATLAB bundled OpenMP), use: compile_mex_matlab_omp\n');
